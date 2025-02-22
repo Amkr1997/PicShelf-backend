@@ -15,7 +15,7 @@ const { Album } = require("./models/album.model");
 const { Image } = require("./models/image.model");
 
 const corsOptions = {
-  origin: "*",
+  origin: ["http://localhost:5173"],
   credentials: true,
   openSuccessStatus: 200,
 };
