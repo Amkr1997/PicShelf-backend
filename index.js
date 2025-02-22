@@ -72,13 +72,11 @@ app.get("/auth/google/callback", async (req, res) => {
     );
     const { id, email, name } = googleUserResponse.data;
 
-    console.log(id);
-
     const alreadyOwner = await Owner.findOne({ googleId: id });
 
     let jwtToken;
     if (!alreadyOwner) {
-      const newOwner = new Owner({ googleId: id, email });
+      const newOwner = new Owner({ googleId: id, email, name });
       await newOwner.save();
 
       jwtToken = jwt.sign(
