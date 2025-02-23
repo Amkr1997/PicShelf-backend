@@ -16,6 +16,14 @@ const albumSchema = new mongoose.Schema({
     type: String,
   },
 
+  imageId: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PicShelfImg",
+      required: true,
+    },
+  ],
+
   sharedUsers: [
     {
       type: String,

@@ -24,8 +24,8 @@ app.use(express.json());
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    //const assetsPath = path.resolve(__dirname, "assets");
-    return cb(null, "/tmp");
+    const assetsPath = path.resolve(__dirname, "assets");
+    return cb(null, assetsPath);
   },
 
   filename: function (req, file, cb) {
@@ -162,6 +162,22 @@ app.post(
       if (!savedImg)
         return res.status(404).json({ message: "Image not saved" });
 
+      const updatedAlbum = await Album.findByIdAndUpdate(
+        albumId,
+        {
+          $addToSet: { imageId: newImg._id },
+        },
+        { new: true }
+      );
+
+      if (!updatedAlbum) {
+        await Image.findByIdAndDelete(newImg._id);
+
+        return res.status(500).json({
+          message: "Failed to update image album",
+        });
+      }
+
       return res.status(200).json({ message: "Image added", savedImg });
     } catch (error) {
       return res.status(500).json({ error: "Internal server error" });
@@ -274,6 +290,7 @@ app.delete(
     try {
       const album = await Album.findById(albumId);
       const owner = await Owner.findById(userId);
+      const image = await Image.findById(imageId);
 
       if (!owner || !album) {
         return res.status(404).json({ message: "You cannot delete image" });
@@ -286,6 +303,21 @@ app.delete(
       const imageToDelete = await Image.findByIdAndDelete(imageId);
       if (!imageToDelete) {
         return res.status(404).json({ message: "Cannot delete images" });
+      }
+
+      const updateAlbum = await Album.findByIdAndUpdate(
+        albumId,
+        {
+          $pull: { imageId: imageId },
+        },
+        { new: true }
+      );
+
+      if (!updateAlbum) {
+        const newImage = new Image(image);
+        await newImage.save();
+
+        return res.status(200).json({ message: "Failed to delete image" });
       }
 
       return res
@@ -308,24 +340,23 @@ app.get("/get/all/users", async (req, res) => {
 
     return res.status(200).json(allUsers);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ error: "Failed to fetch access token from Google." });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // Get Album
 app.get("/get/album", async (req, res) => {
   try {
-    const allAlbums = await Album.find();
+    const allAlbums = await Album.find().populate({
+      path: "imageId",
+      select: "imageName",
+    });
 
     if (!allAlbums) return res.status(404).json({ message: "No albums found" });
 
     return res.status(200).json(allAlbums);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ error: "Failed to fetch access token from Google." });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
