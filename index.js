@@ -426,9 +426,8 @@ app.post("/share/album/:albumId/user/:userId", async (req, res) => {
     );
 
     if (ownerEmail) {
-      console.log(ownerEmail);
       return res
-        .status(409)
+        .status(404)
         .json({ message: "Cannot send share to same owner" });
     }
 
@@ -454,7 +453,7 @@ app.delete("/delete/album/:albumId/user/:userId", async (req, res) => {
   try {
     const correctAlbum = await Album.find({ userId });
 
-    if (!correctAlbum)
+    if (correctAlbum.length < 1)
       return res.status(404).json({ message: "You can't delete album" });
 
     const deletedAlbum = await Album.findByIdAndDelete(albumId);
@@ -463,11 +462,16 @@ app.delete("/delete/album/:albumId/user/:userId", async (req, res) => {
       return res.status(404).json({ message: "Album cannot get update" });
     }
 
+    const imageToDelete = await Image.deleteMany({ albumId });
+
+    if (!imageToDelete.acknowledged) {
+      const newAlbum = new Album(correctAlbum);
+      await newAlbum.save();
+    }
+
     return res.status(200).json(deletedAlbum);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ error: "Failed to fetch access token from Google." });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
