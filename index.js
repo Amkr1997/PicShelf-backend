@@ -214,6 +214,21 @@ app.get("/get/all/images/fav", async (req, res) => {
   }
 });
 
+app.get("/get/single/image/:id", async (req, res) => {
+  const imageId = req.params.id;
+
+  try {
+    const singleImg = await Image.findById(imageId);
+
+    if (!singleImg)
+      return res.status(404).json({ message: "Cannot find the image" });
+
+    return res.status(200).json(singleImg);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Get Images by Tags
 app.get("/albums/:albumId/images", async (req, res) => {
   const { tags } = req.query;
