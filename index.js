@@ -133,10 +133,6 @@ app.post(
     const albumId = req.params.albumId;
     const imageData = req.body;
 
-    console.log(req.params.albumId);
-    console.log(req.body);
-    console.log(req.files);
-
     try {
       const alreadyAlbum = await Album.findById(albumId);
       if (!alreadyAlbum) {
