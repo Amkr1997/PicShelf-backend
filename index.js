@@ -24,7 +24,7 @@ app.use(express.json());
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // const assetsPath = path.resolve(__dirname, "assets");
+    //const assetsPath = path.resolve(__dirname, "assets");
     return cb(null, "/tmp");
   },
 
@@ -370,6 +370,24 @@ app.get("/get/album", async (req, res) => {
     if (!allAlbums) return res.status(404).json({ message: "No albums found" });
 
     return res.status(200).json(allAlbums);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get Single Album
+app.get("/get/single/album/:albumId", async (req, res) => {
+  const albumId = req.params.albumId;
+
+  try {
+    const singleAlbum = await Album.findById(albumId).populate({
+      path: "imageId",
+    });
+
+    if (!singleAlbum)
+      return res.status(404).json({ message: "No albums found" });
+
+    return res.status(200).json(singleAlbum);
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });
   }
