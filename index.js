@@ -24,8 +24,8 @@ app.use(express.json());
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const assetsPath = path.resolve(__dirname, "assets");
-    return cb(null, assetsPath);
+    // const assetsPath = path.resolve(__dirname, "assets");
+    return cb(null, "/tmp");
   },
 
   filename: function (req, file, cb) {
@@ -132,6 +132,10 @@ app.post(
   async (req, res) => {
     const albumId = req.params.albumId;
     const imageData = req.body;
+
+    console.log(req.params.albumId);
+    console.log(req.body);
+    console.log(req.files);
 
     try {
       const alreadyAlbum = await Album.findById(albumId);
