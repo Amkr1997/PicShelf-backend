@@ -15,7 +15,7 @@ const { Album } = require("./models/album.model");
 const { Image } = require("./models/image.model");
 
 const corsOptions = {
-  origin: ["http://localhost:5173"],
+  origin: ["http://localhost:5173", "https://pic-shelf.vercel.app"],
   credentials: true,
   openSuccessStatus: 200,
 };
